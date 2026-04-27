@@ -1,0 +1,106 @@
+// Plane එකේ පිහිටීම
+float planeX, planeY;
+float planeSpeed = 5;
+
+// බෝම්බ සඳහා variables
+float[] bombX = new float[5];
+float[] bombY = new float[5];
+float[] bombSpeed = new float[5];
+
+int score = 0;
+boolean gameOver = false;
+
+void setup() {
+  size(600, 400); // Screen size එක
+  planeX = width/2;
+  planeY = height - 50;
+  
+  // බෝම්බ ආරම්භක ස්ථාන සහ වේගය සකස් කිරීම
+  for (int i = 0; i < bombX.length; i++) {
+    resetBomb(i);
+  }
+}
+
+void draw() {
+  if (!gameOver) {
+    background(135, 206, 235); // අහසේ පැහැය (Sky Blue)
+    
+    // Score එක පෙන්වීම
+    fill(0);
+    textSize(20);
+    text("Score: " + score, 20, 30);
+
+    // Plane එක ඇඳීම (W, A, D මගින් පාලනය)
+    drawPlane();
+    movePlane();
+
+    // බෝම්බ හැසිරවීම
+    for (int i = 0; i < bombX.length; i++) {
+      fill(255, 255, 0); // බෝම්බ වල පාට (කහ)
+      ellipse(bombX[i], bombY[i], 20, 20);
+      bombY[i] += bombSpeed[i];
+
+      // බෝම්බය ප්ලේන් එකේ වැදුනොත් (Collision detection)
+      if (dist(planeX, planeY, bombX[i], bombY[i]) < 25) {
+        gameOver = true;
+      }
+
+      // බෝම්බය පොළොවට වැටුණොත් නැවත මුලට යැවීම
+      if (bombY[i] > height) {
+        resetBomb(i);
+        score++; // ලකුණු එකතු කිරීම
+      }
+    }
+  } else {
+    showGameOver();
+  }
+}
+
+void drawPlane() {
+  fill(255, 0, 0); // ප්ලේන් එකේ පාට (රතු)
+  triangle(planeX, planeY-20, planeX-20, planeY+10, planeX+20, planeY+10);
+}
+
+void movePlane() {
+  if (keyPressed) {
+    if (key == 'a' || key == 'A') {
+      planeX -= planeSpeed;
+    }
+    if (key == 'd' || key == 'D') {
+      planeX += planeSpeed;
+    }
+    if (key == 'w' || key == 'W') {
+      planeY -= planeSpeed;
+    }
+    // Screen එකෙන් පිටට නොයෑමට වග බලා ගැනීම
+    planeX = constrain(planeX, 20, width-20);
+    planeY = constrain(planeY, 20, height-20);
+  }
+}
+
+void resetBomb(int i) {
+  bombX[i] = random(width);
+  bombY[i] = random(-500, -50);
+  bombSpeed[i] = random(3, 7);
+}
+
+void showGameOver() {
+  background(0);
+  fill(255);
+  textAlign(CENTER);
+  textSize(40);
+  text("GAME OVER!", width/2, height/2);
+  textSize(20);
+  text("Final Score: " + score, width/2, height/2 + 40);
+  text("Press 'R' to Restart", width/2, height/2 + 80);
+  
+  if (keyPressed && (key == 'r' || key == 'R')) {
+    restartGame();
+  }
+}
+
+void restartGame() {
+  score = 0;
+  gameOver = false;
+  setup();
+}
